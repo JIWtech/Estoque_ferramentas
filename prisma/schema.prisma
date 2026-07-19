@@ -1,0 +1,96 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Category {
+  id       String    @id
+  name     String
+  prefix   String
+  drawers  Drawer[]
+  products Product[]
+}
+
+model Drawer {
+  id         String    @id
+  name       String
+  categoryId String
+  category   Category  @relation(fields: [categoryId], references: [id])
+  order      Int
+  products   Product[]
+}
+
+model Product {
+  id               String    @id
+  internalId       String    @unique
+  manufacturerCode String
+  name             String
+  description      String
+  categoryId       String
+  category         Category  @relation(fields: [categoryId], references: [id])
+  drawerId         String
+  drawer           Drawer    @relation(fields: [drawerId], references: [id])
+  quantity         Int       @default(0)
+  price            Float
+  status           String    @default("Ativo")
+  imageUrl         String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  entries          Entry[]
+  exits            Exit[]
+  receipts         Receipt[]
+}
+
+model Entry {
+  id        String   @id
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  user      String
+  notes     String?
+  date      DateTime @default(now())
+}
+
+model Exit {
+  id          String   @id
+  receiptId   String   @unique
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  responsible String
+  destination String?
+  reason      String
+  date        DateTime @default(now())
+  receipt     Receipt  @relation(fields: [receiptId], references: [id])
+}
+
+model Receipt {
+  id            String   @id
+  number        String   @unique
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  quantity      Int
+  price         Float
+  responsible   String
+  destination   String?
+  reason        String
+  signatureName String
+  date          DateTime @default(now())
+  exit          Exit?
+}
+
+model Audit {
+  id     String   @id
+  date   DateTime @default(now())
+  user   String
+  action String
+}
+
+model Counter {
+  prefix String @id
+  value  Int    @default(0)
+}
