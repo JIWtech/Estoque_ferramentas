@@ -1,3 +1,4 @@
+process.env.DATABASE_URL = process.env.DATABASE_URL || "file:./dev.db";
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
