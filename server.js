@@ -1,7 +1,21 @@
-process.env.DATABASE_URL = process.env.DATABASE_URL || "file:./dev.db";
+const path = require("path");
+const { execSync } = require("child_process");
+
+const dbPath = path.resolve(__dirname, "prisma", "dev.db");
+process.env.DATABASE_URL = process.env.DATABASE_URL || `file:${dbPath}`;
+
+// Garantir que a estrutura do banco e dados de seed existam no servidor
+try {
+  console.log("Verificando/Inicializando banco de dados SQLite em:", process.env.DATABASE_URL);
+  execSync("npx prisma db push --skip-generate", { stdio: "inherit", env: process.env });
+  execSync("node prisma/seed.js", { stdio: "inherit", env: process.env });
+  console.log("Banco de dados verificado e populado com sucesso!");
+} catch (err) {
+  console.error("Erro na auto-inicialização do banco de dados:", err.message);
+}
+
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
