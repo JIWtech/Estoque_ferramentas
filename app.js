@@ -710,7 +710,7 @@ function filteredProducts() {
 
   // 2. Category Filter
   if (state.productCategoryFilter) {
-    list = list.filter(item => item.categoryId === state.productCategoryFilter);
+    list = list.filter(item => item.categoryId === state.productCategoryFilter || categoryName(item.categoryId) === state.productCategoryFilter);
   }
 
   // 3. Drawer Filter
@@ -1268,8 +1268,9 @@ function auditView() {
   `;
 }
 
-function categorySelect(id, selected) {
-  return `<select id="${id}">${categories.map((item) => `<option value="${item.id}" ${item.id === selected ? "selected" : ""}>${item.name}</option>`).join("")}</select>`;
+function categorySelect(id, selected, defaultLabel = "") {
+  const defaultOption = defaultLabel ? `<option value="">${escapeHtml(defaultLabel)}</option>` : "";
+  return `<select id="${id}">${defaultOption}${categories.map((item) => `<option value="${item.id}" ${item.id === selected ? "selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}</select>`;
 }
 
 function drawerSelect(id, selected) {

@@ -1371,24 +1371,46 @@ tr:hover td {
 }
 
 @media (max-width: 768px) {
+  .content {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    padding: 12px !important;
+  }
+
   .desktop-only {
     display: none !important;
   }
   
   .mobile-only {
     display: block !important;
+    width: 100% !important;
   }
 
   .grid-4 {
     grid-template-columns: 1fr !important;
   }
 
-  /* Remove panel layout padding on mobile to maximize card and table width */
-  .panel {
-    padding: 12px !important;
+  .panel,
+  .products-panel {
+    padding: 0 !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    overflow: visible !important;
+    flex: unset !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .products-cards,
+  .audit-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
 
   .topbar .actions {
