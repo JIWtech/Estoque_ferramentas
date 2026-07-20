@@ -460,25 +460,27 @@ textarea {
   box-shadow: none !important;
   background: transparent !important;
   overflow-x: auto !important;
-  overflow-y: visible !important;
+  overflow-y: auto !important;
+  max-height: 520px !important;
+  scroll-behavior: smooth;
 }
 
-/* Scrollbar suave e elegante para dentro da tabela */
+/* Scrollbar visível e elegante em Laranja Industrial para dentro da tabela */
 .table-wrap::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px !important;
+  height: 8px !important;
 }
 .table-wrap::-webkit-scrollbar-track {
-  background: rgba(10, 11, 14, 0.6);
-  border-radius: 4px;
+  background: #0d0e12 !important;
+  border-radius: 4px !important;
 }
 .table-wrap::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.4);
-  border-radius: 4px;
-  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: #f97316 !important;
+  border-radius: 4px !important;
+  border: 1.5px solid rgba(249, 115, 22, 0.4) !important;
 }
 .table-wrap::-webkit-scrollbar-thumb:hover {
-  background: rgba(249, 115, 22, 0.85);
+  background: #ff8800 !important;
 }
 
 table {
