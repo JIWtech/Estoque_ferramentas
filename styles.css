@@ -301,7 +301,7 @@ textarea {
   gap: 16px;
   height: 100vh !important;
   max-height: 100vh !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
   box-sizing: border-box;
 }
 
@@ -438,25 +438,18 @@ textarea {
 }
 
 .desktop-only {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
 }
 
-/* Container único para painéis com tabela e rolagem interna */
+/* Container de produtos com rolagem livre e visual único */
 .products-panel,
 .panel:has(.table-wrap) {
   padding: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   background: var(--panel);
   border: 1.5px solid var(--line);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  flex: 1 !important;
-  min-height: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
 }
 
 .products-panel .table-wrap,
@@ -467,11 +460,7 @@ textarea {
   box-shadow: none !important;
   background: transparent !important;
   overflow-x: auto !important;
-  overflow-y: auto !important;
-  flex: 1 !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
-  scroll-behavior: smooth;
+  overflow-y: visible !important;
 }
 
 /* Scrollbar suave e elegante para dentro da tabela */
