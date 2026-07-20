@@ -45,6 +45,7 @@ let state = {
   exits: [],
   receipts: [],
   audit: [],
+  auditLimit: 15,
   search: "",
   productCategoryFilter: "",
   productDrawerFilter: "",
@@ -132,18 +133,25 @@ function loginScreen() {
   return `
     <section class="login-screen">
       <form class="login-panel" id="loginForm">
-        <div class="eyebrow">Estoque Paralelo</div>
-        <h1>Ferramentaria</h1>
-        <p>Controle de ferramentas com armário 2D, entradas, saídas, recibos e histórico.</p>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #ff7700 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div>
+            <strong style="font-size: 1.5rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; display: block; line-height: 1.1;">ICATech<span style="color: #f97316;">Tools</span></strong>
+            <span style="font-size: 0.75rem; color: #f59e0b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">Ferramentas que Transformam</span>
+          </div>
+        </div>
+        <p>Sistema industrial de controle de estoque paralelo, gavetas 2D e saídas com recibo.</p>
         <div class="field">
           <label for="username">Usuário</label>
-          <input id="username" value="admin" autocomplete="username" />
+          <input id="username" placeholder="Digite seu usuário" autocomplete="username" />
         </div>
         <div class="field">
           <label for="password">Senha</label>
-          <input id="password" type="password" value="123" autocomplete="current-password" />
+          <input id="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" />
         </div>
-        <button class="btn primary" type="submit">Entrar</button>
+        <button class="btn primary" type="submit">Entrar no Sistema</button>
         <p id="loginError"></p>
       </form>
       <div class="login-visual"></div>
@@ -159,12 +167,20 @@ function shell() {
         <button class="btn-menu" data-action="toggleSidebar" aria-label="Abrir Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div class="mobile-brand">Ferramentaria</div>
+        <div class="mobile-brand">ICATech<span style="color: #f97316;">Tools</span></div>
       </header>
       <aside class="sidebar">
         <div class="brand">
-          <strong>Ferramentaria</strong>
-          <span>Usuário: ${escapeHtml(state.user)}</span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, #ff7700 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4); flex-shrink: 0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div style="min-width: 0;">
+              <strong style="font-size: 1.15rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; display: block; line-height: 1.1; white-space: nowrap;">ICATech<span style="color: #f97316;">Tools</span></strong>
+              <span style="font-size: 0.7rem; color: #f59e0b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: block; white-space: nowrap;">Ferramentaria</span>
+            </div>
+          </div>
+          <span style="margin-top: 8px; font-size: 0.8rem; color: var(--muted); display: block;">Operador: <strong style="color: #ffffff;">${escapeHtml(state.user)}</strong></span>
         </div>
         <nav class="nav">
           ${navButton("dashboard", "Dashboard")}
@@ -175,8 +191,7 @@ function shell() {
           ${navButton("reports", "Relatórios")}
           ${navButton("audit", "Histórico")}
         </nav>
-        <small>Saída finalizada sempre exige recibo com assinatura.</small>
-        <button class="btn ghost" data-action="logout">Sair</button>
+        <button class="btn ghost" data-action="logout" style="margin-top: auto;">Sair</button>
       </aside>
       <section class="content">
         ${viewContent()}
@@ -264,14 +279,11 @@ function viewContent() {
   return views[currentView]();
 }
 
-function renderAuditRow(item) {
-  const dateObj = new Date(item.date);
-  const dateStr = dateObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-  const timeStr = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
-  let actionBadge = "";
+function formatAuditItem(item) {
+  let actionBadge = `<span class="badge" style="background: #1e293b; color: #94a3b8; font-size: 0.72rem; padding: 2px 6px;">Ação</span>`;
   let actionQty = "-";
-  let actionText = item.action;
+  let qtyColor = "var(--muted)";
+  let actionText = escapeHtml(item.action);
 
   if (item.action.startsWith("Entrada registrada:")) {
     const parts = item.action.split(":");
@@ -279,8 +291,9 @@ function renderAuditRow(item) {
     const code = details[0] || "";
     const qty = details[1] || "";
     actionBadge = `<span class="badge" style="background: #064e3b; color: #34d399; font-size: 0.72rem; padding: 2px 6px;">Entrada</span>`;
-    actionQty = `<span style="color: #34d399; font-weight: 700;">+${qty}</span>`;
-    actionText = `Item: <strong>${code}</strong>`;
+    actionQty = `+${qty}`;
+    qtyColor = "#34d399";
+    actionText = `Item: <strong>${escapeHtml(code)}</strong>`;
   } else if (item.action.startsWith("Saída finalizada") || item.action.startsWith("Saida finalizada")) {
     const match = item.action.match(/recibo (REC-\d+):\s*([A-Z0-9-]+)\s*(-?\d+)/);
     if (match) {
@@ -288,35 +301,81 @@ function renderAuditRow(item) {
       const code = match[2];
       const qty = match[3];
       actionBadge = `<span class="badge" style="background: #4c0519; color: #fca5a5; font-size: 0.72rem; padding: 2px 6px;">Saída</span>`;
-      actionQty = `<span style="color: #fca5a5; font-weight: 700;">${qty}</span>`;
-      actionText = `Item: <strong>${code}</strong> <span style="font-size: 0.78rem; color: var(--muted); margin-left: 6px;">(Recibo: ${receipt})</span>`;
+      actionQty = `${qty}`;
+      qtyColor = "#fca5a5";
+      actionText = `Item: <strong>${escapeHtml(code)}</strong> <span style="font-size: 0.78rem; color: var(--muted); margin-left: 6px;">(Recibo: ${escapeHtml(receipt)})</span>`;
     }
+  } else if (item.action.startsWith("Ferramenta ") || item.action.includes("movida de") || item.action.includes("movida para") || item.action.includes("movidas para")) {
+    actionBadge = `<span class="badge" style="background: rgba(249, 115, 22, 0.18); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.3); font-size: 0.72rem; padding: 2px 6px;">Movimentação</span>`;
+    const qtyMatch = item.action.match(/^(\d+)\s+ferramentas/i);
+    actionQty = qtyMatch ? qtyMatch[1] : "1";
+    qtyColor = "#f97316";
+
+    const parts = item.action.split(". Motivo:");
+    const mainDetail = parts[0].trim();
+    const reasonText = parts[1]?.trim();
+
+    // Tenta extrair: Ferramenta CODE (NAME) movida de 'ORIGIN' para 'TARGET'
+    const moveMatch = mainDetail.match(/Ferramenta\s+([^\s()]+)(?:\s+\(([^()]+)\))?\s+movida\s+de\s+'([^']+)'\s+para\s+'([^']+)'/i);
+
+    let formattedMain = "";
+    if (moveMatch) {
+      const code = moveMatch[1];
+      const name = moveMatch[2];
+      const origin = moveMatch[3];
+      const target = moveMatch[4];
+
+      formattedMain = `Item: <strong>${escapeHtml(code)}</strong> ${name ? `<span style="color: var(--muted); font-size: 0.82rem;">(${escapeHtml(name)})</span> ` : ""}: <span style="color: #94a3b8; font-weight: 700;">'${escapeHtml(origin)}'</span> ➔ <strong style="color: var(--accent);">'${escapeHtml(target)}'</strong>`;
+    } else {
+      formattedMain = escapeHtml(mainDetail);
+    }
+
+    const reasonBadge = reasonText
+      ? `<span style="display: inline-flex; align-items: center; margin-left: 8px; padding: 2px 8px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; font-size: 0.78rem; font-weight: 700;"><strong style="color: #f59e0b; margin-right: 4px;">Motivo:</strong> ${escapeHtml(reasonText)}</span>`
+      : "";
+
+    actionText = `<span>${formattedMain}</span>${reasonBadge}`;
   } else if (item.action.startsWith("Produto editado:")) {
     const code = item.action.replace("Produto editado:", "").trim();
     actionBadge = `<span class="badge" style="background: #1e293b; color: #38bdf8; font-size: 0.72rem; padding: 2px 6px;">Edição</span>`;
-    actionText = `Produto: <strong>${code}</strong>`;
+    actionText = `Produto: <strong>${escapeHtml(code)}</strong>`;
   } else if (item.action.startsWith("Produto cadastrado:")) {
     const code = item.action.replace("Produto cadastrado:", "").trim();
     actionBadge = `<span class="badge" style="background: #0f172a; color: #10b981; font-size: 0.72rem; padding: 2px 6px;">Cadastro</span>`;
-    actionText = `Novo item: <strong>${code}</strong>`;
+    actionText = `Novo item: <strong>${escapeHtml(code)}</strong>`;
   } else if (item.action.startsWith("Gaveta criada:")) {
     const name = item.action.replace("Gaveta criada:", "").trim();
     actionBadge = `<span class="badge" style="background: #1e293b; color: #fbbf24; font-size: 0.72rem; padding: 2px 6px;">Gaveta</span>`;
-    actionText = `Nova gaveta: <strong>${name}</strong>`;
+    actionText = `Nova gaveta: <strong>${escapeHtml(name)}</strong>`;
   } else if (item.action.startsWith("Gaveta editada:")) {
     const name = item.action.replace("Gaveta editada:", "").trim();
     actionBadge = `<span class="badge" style="background: #1e293b; color: #fbbf24; font-size: 0.72rem; padding: 2px 6px;">Gaveta</span>`;
-    actionText = `Editou gaveta: <strong>${name}</strong>`;
+    actionText = `Editou gaveta: <strong>${escapeHtml(name)}</strong>`;
   } else if (item.action.startsWith("Gaveta excluída:") || item.action.startsWith("Gaveta excluida:")) {
     const name = item.action.replace(/Gaveta excluída:|Gaveta excluida:/, "").trim();
     actionBadge = `<span class="badge" style="background: #4c0519; color: #fda4af; font-size: 0.72rem; padding: 2px 6px;">Exclusão</span>`;
-    actionText = `Gaveta excluída: <strong>${name}</strong>`;
+    actionText = `Gaveta excluída: <strong>${escapeHtml(name)}</strong>`;
   } else if (item.action.startsWith("Operação em massa") || item.action.startsWith("Operacao em massa")) {
-    actionBadge = `<span class="badge" style="background: #312e81; color: #c7d2fe; font-size: 0.72rem; padding: 2px 6px;">Lote</span>`;
-    actionText = item.action;
-  } else {
-    actionBadge = `<span class="badge" style="background: #1e293b; color: #94a3b8; font-size: 0.72rem; padding: 2px 6px;">Ação</span>`;
+    if (item.action.includes("em 1 produtos")) {
+      actionBadge = `<span class="badge" style="background: rgba(249, 115, 22, 0.18); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.3); font-size: 0.72rem; padding: 2px 6px;">Movimentação</span>`;
+      actionQty = "1";
+      qtyColor = "#f97316";
+      actionText = `Movimentação de 1 ferramenta entre gavetas`;
+    } else {
+      actionBadge = `<span class="badge" style="background: #312e81; color: #c7d2fe; font-size: 0.72rem; padding: 2px 6px;">Lote</span>`;
+      actionText = escapeHtml(item.action);
+    }
   }
+
+  return { actionBadge, actionQty, qtyColor, actionText };
+}
+
+function renderAuditRow(item) {
+  const dateObj = new Date(item.date);
+  const dateStr = dateObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  const timeStr = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  const { actionBadge, actionQty, actionText } = formatAuditItem(item);
 
   return `
     <tr>
@@ -341,57 +400,7 @@ function renderAuditMobileCards(items) {
           const dateStr = dateObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
           const timeStr = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
           
-          let actionBadge = "";
-          let actionQty = "-";
-          let actionText = item.action;
-          let qtyColor = "var(--muted)";
-          
-          if (item.action.startsWith("Entrada registrada:")) {
-            const parts = item.action.split(":");
-            const details = parts[1]?.trim().split(" ") || [];
-            const code = details[0] || "";
-            const qty = details[1] || "";
-            actionBadge = `<span class="badge" style="background: #064e3b; color: #34d399; font-size: 0.72rem; padding: 2px 6px;">Entrada</span>`;
-            actionQty = `+${qty}`;
-            qtyColor = "#34d399";
-            actionText = `Item: <strong>${code}</strong>`;
-          } else if (item.action.startsWith("Saída finalizada") || item.action.startsWith("Saida finalizada")) {
-            const match = item.action.match(/recibo (REC-\d+):\s*([A-Z0-9-]+)\s*(-?\d+)/);
-            if (match) {
-              const receipt = match[1];
-              const code = match[2];
-              const qty = match[3];
-              actionBadge = `<span class="badge" style="background: #4c0519; color: #fca5a5; font-size: 0.72rem; padding: 2px 6px;">Saída</span>`;
-              actionQty = `${qty}`;
-              qtyColor = "#fca5a5";
-              actionText = `Item: <strong>${code}</strong> <span style="font-size: 0.78rem; color: var(--muted); display: block; margin-top: 2px;">Recibo: ${receipt}</span>`;
-            }
-          } else if (item.action.startsWith("Produto editado:")) {
-            const code = item.action.replace("Produto editado:", "").trim();
-            actionBadge = `<span class="badge" style="background: #1e293b; color: #38bdf8; font-size: 0.72rem; padding: 2px 6px;">Edição</span>`;
-            actionText = `Produto: <strong>${code}</strong>`;
-          } else if (item.action.startsWith("Produto cadastrado:")) {
-            const code = item.action.replace("Produto cadastrado:", "").trim();
-            actionBadge = `<span class="badge" style="background: #0f172a; color: #10b981; font-size: 0.72rem; padding: 2px 6px;">Cadastro</span>`;
-            actionText = `Novo item: <strong>${code}</strong>`;
-          } else if (item.action.startsWith("Gaveta criada:")) {
-            const name = item.action.replace("Gaveta criada:", "").trim();
-            actionBadge = `<span class="badge" style="background: #1e293b; color: #fbbf24; font-size: 0.72rem; padding: 2px 6px;">Gaveta</span>`;
-            actionText = `Nova gaveta: <strong>${name}</strong>`;
-          } else if (item.action.startsWith("Gaveta editada:")) {
-            const name = item.action.replace("Gaveta editada:", "").trim();
-            actionBadge = `<span class="badge" style="background: #1e293b; color: #fbbf24; font-size: 0.72rem; padding: 2px 6px;">Gaveta</span>`;
-            actionText = `Editou gaveta: <strong>${name}</strong>`;
-          } else if (item.action.startsWith("Gaveta excluída:") || item.action.startsWith("Gaveta excluida:")) {
-            const name = item.action.replace(/Gaveta excluída:|Gaveta excluida:/, "").trim();
-            actionBadge = `<span class="badge" style="background: #4c0519; color: #fda4af; font-size: 0.72rem; padding: 2px 6px;">Exclusão</span>`;
-            actionText = `Gaveta excluída: <strong>${name}</strong>`;
-          } else if (item.action.startsWith("Operação em massa") || item.action.startsWith("Operacao em massa")) {
-            actionBadge = `<span class="badge" style="background: #312e81; color: #c7d2fe; font-size: 0.72rem; padding: 2px 6px;">Lote</span>`;
-            actionText = item.action;
-          } else {
-            actionBadge = `<span class="badge" style="background: #1e293b; color: #94a3b8; font-size: 0.72rem; padding: 2px 6px;">Ação</span>`;
-          }
+          const { actionBadge, actionQty, qtyColor, actionText } = formatAuditItem(item);
 
           return `
             <div class="log-mobile-card">
@@ -1194,7 +1203,19 @@ function filterListByDateAndCategory(list, dateField) {
 }
 
 function auditView() {
-  const auditRowsHtml = state.audit.map(renderAuditRow).join("");
+  const visibleAudit = state.audit.slice(0, state.auditLimit || 15);
+  const hasMore = state.audit.length > visibleAudit.length;
+  const auditRowsHtml = visibleAudit.map(renderAuditRow).join("");
+
+  const loadMoreBtnHtml = hasMore ? `
+    <div style="text-align: center; margin-top: 20px; border-top: 1.5px solid var(--line); padding-top: 20px;">
+      <button class="btn ghost" data-action="loadMoreAudit" style="min-width: 220px; padding: 12px 24px; font-weight: 800; border-color: var(--accent); color: var(--accent);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        Ver Mais (${state.audit.length - visibleAudit.length} registros restantes)
+      </button>
+    </div>
+  ` : "";
+
   const panelContent = state.audit.length ? `
     <div class="desktop-only">
       <div class="table-wrap">
@@ -1214,7 +1235,8 @@ function auditView() {
         </table>
       </div>
     </div>
-    ${renderAuditMobileCards(state.audit)}
+    ${renderAuditMobileCards(visibleAudit)}
+    ${loadMoreBtnHtml}
   ` : emptyState(
     `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
     "Nenhuma movimentação no histórico",
@@ -1948,6 +1970,24 @@ function handleAction(action, id) {
   const drawer = state.drawers.find((item) => item.id === id);
   const actions = {
     logout: () => {
+      openModal(`
+        <div style="width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 18px;">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); color: #ef4444; display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(239, 68, 68, 0.35); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </div>
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 6px;">Confirmar Saída</h2>
+            <p style="color: var(--muted); font-size: 0.92rem; line-height: 1.5;">Tem certeza de que deseja sair do sistema?</p>
+          </div>
+          <div style="display: flex; gap: 12px; width: 100%; margin-top: 6px;">
+            <button class="btn ghost" type="button" data-action="closeModal" style="flex: 1; min-height: 44px; font-weight: 700;">Cancelar</button>
+            <button class="btn danger" type="button" data-action="confirmLogout" style="flex: 1; min-height: 44px; font-weight: 800;">Sim, Sair</button>
+          </div>
+        </div>
+      `);
+    },
+    confirmLogout: () => {
+      closeModal();
       state.loggedIn = false;
       state.user = null;
       state.search = "";
@@ -1977,6 +2017,10 @@ function handleAction(action, id) {
     printReceipt: () => printReceipt(id),
     printReports: () => printReports(),
     printAudit: () => printAudit(),
+    loadMoreAudit: () => {
+      state.auditLimit = (state.auditLimit || 15) + 15;
+      app();
+    },
     toggleSidebar: () => {
       const shellEl = document.querySelector(".app-shell");
       if (shellEl) {
@@ -2146,6 +2190,71 @@ function bindForms() {
       showToast(err.message, "error");
     }
   });
+
+  document.getElementById("moveJustificationForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const productIdsStr = document.getElementById("moveProductIds").value;
+    const targetDrawerId = document.getElementById("moveTargetDrawerId").value;
+    const reason = document.getElementById("moveReason").value.trim();
+
+    if (!reason) {
+      return showToast("Por favor, informe a justificativa da movimentação.", "error");
+    }
+
+    const ids = productIdsStr.split(",");
+    const payload = {
+      ids,
+      drawerId: targetDrawerId,
+      reason,
+      user: state.user,
+    };
+
+    try {
+      const response = await fetch("/api/products/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Erro ao mover ferramentas.");
+      }
+
+      closeModal();
+      await refreshState();
+      selectedDrawerId = targetDrawerId;
+      selectedProductIds = [];
+      app();
+      showToast("Ferramenta(s) movida(s) com sucesso!");
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  });
+
+  document.getElementById("loginForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const userEl = document.getElementById("username");
+    const passEl = document.getElementById("password");
+    const username = userEl ? userEl.value.trim() : "";
+    const password = passEl ? passEl.value.trim() : "";
+
+    // Apenas usuario 'ian' com senha 'cacau'
+    if (username.toLowerCase() === "ian" && password === "cacau") {
+      state.loggedIn = true;
+      state.user = "ian";
+      localStorage.setItem("ferramentaria_user", "ian");
+      app();
+      showToast("Bem-vindo, ian!");
+    } else {
+      const errEl = document.getElementById("loginError");
+      if (errEl) {
+        errEl.textContent = "Usuário ou senha incorretos.";
+      } else {
+        showToast("Usuário ou senha incorretos.", "error");
+      }
+    }
+  });
 }
 
 function bindDragDrop() {
@@ -2193,7 +2302,54 @@ function bindDragDrop() {
   });
 }
 
-async function moveProduct(productIdsStr, drawerId) {
+function moveJustificationModal(toMoveIds, drawerId) {
+  const targetDrawer = state.drawers.find(d => d.id === drawerId);
+  const productsToMove = toMoveIds.map(id => state.products.find(p => p.id === id)).filter(Boolean);
+
+  if (!productsToMove.length || !targetDrawer) return;
+
+  const itemsListHtml = productsToMove.map(p => `
+    <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #0d0e12; border: 1.5px solid var(--line); border-radius: 8px; font-size: 0.88rem;">
+      <span><strong style="color: var(--accent); font-family: monospace;">${escapeHtml(p.internalId)}</strong> - ${escapeHtml(p.name)}</span>
+      <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 0.75rem;">${escapeHtml(drawerName(p.drawerId))}</span>
+    </li>
+  `).join("");
+
+  openModal(`
+    <form id="moveJustificationForm" style="max-width: 520px; width: 100%; display: flex; flex-direction: column; gap: 18px;">
+      <div style="border-bottom: 2px solid var(--line); padding-bottom: 12px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--ink);">Justificativa de Movimentação</h2>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">Informe o motivo para mover ${productsToMove.length === 1 ? "esta ferramenta" : "estes " + productsToMove.length + " produtos"} para a gaveta <strong style="color: var(--accent);">${escapeHtml(targetDrawer.name)}</strong>.</p>
+      </div>
+
+      <input type="hidden" id="moveProductIds" value="${toMoveIds.join(",")}" />
+      <input type="hidden" id="moveTargetDrawerId" value="${drawerId}" />
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+          ${productsToMove.length === 1 ? "Ferramenta a ser movida" : "Ferramentas a serem movidas"}
+        </label>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto;">
+          ${itemsListHtml}
+        </ul>
+      </div>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">
+          Justificativa da Mudança <span style="color: var(--danger);">*</span>
+        </label>
+        <textarea id="moveReason" required placeholder="Ex: Organização por tipo de usinagem, gaveta cheia, realocação de seção..." style="min-height: 90px;"></textarea>
+      </div>
+
+      <div class="actions" style="margin-top: 8px; display: flex; gap: 12px;">
+        <button class="btn ghost" type="button" data-action="closeModal" style="flex: 1; min-height: 42px;">Cancelar</button>
+        <button class="btn primary" type="submit" style="flex: 1; min-height: 42px;">Confirmar Movimentação</button>
+      </div>
+    </form>
+  `);
+}
+
+function moveProduct(productIdsStr, drawerId) {
   const ids = productIdsStr.split(",");
   if (!ids.length) return;
 
@@ -2203,29 +2359,7 @@ async function moveProduct(productIdsStr, drawerId) {
   });
   if (!toMoveIds.length) return;
 
-  const payload = {
-    ids: toMoveIds,
-    drawerId: drawerId,
-    user: state.user,
-  };
-  try {
-    const response = await fetch("/api/products/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error || "Erro ao mover produtos.");
-    }
-    await refreshState();
-    selectedDrawerId = drawerId;
-    selectedProductIds = [];
-    app();
-    showToast("Ferramentas movidas com sucesso!");
-  } catch (err) {
-    showToast(err.message, "error");
-  }
+  moveJustificationModal(toMoveIds, drawerId);
 }
 
 async function deleteDrawer(id) {
@@ -2250,9 +2384,13 @@ async function initApp() {
   try {
     await refreshState();
     const savedUser = localStorage.getItem("ferramentaria_user");
-    if (savedUser) {
+    if (savedUser && savedUser.toLowerCase() === "ian") {
       state.loggedIn = true;
-      state.user = savedUser;
+      state.user = "ian";
+    } else {
+      localStorage.removeItem("ferramentaria_user");
+      state.loggedIn = false;
+      state.user = null;
     }
     app();
   } catch (err) {

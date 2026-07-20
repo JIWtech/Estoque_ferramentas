@@ -1,4 +1,6 @@
-process.env.DATABASE_URL = process.env.DATABASE_URL || "file:./dev.db";
+const path = require("path");
+const dbPath = path.resolve(__dirname, "..", "prisma", "dev.db");
+process.env.DATABASE_URL = process.env.DATABASE_URL || `file:${dbPath}`;
 
 const { execSync } = require("child_process");
 

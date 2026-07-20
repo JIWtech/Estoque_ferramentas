@@ -177,37 +177,79 @@ app.put("/api/products/:id", async (req, res) => {
 
 // 4. POST /api/products/bulk
 app.post("/api/products/bulk", async (req, res) => {
-  const { ids, categoryId, drawerId, status, quantityDelta, pricePercent, user } = req.body;
+  const { ids, categoryId, drawerId, status, quantityDelta, pricePercent, reason, user } = req.body;
   const username = user || "admin";
 
   try {
     await prisma.$transaction(async (tx) => {
-      for (const id of ids) {
-        const product = await tx.product.findUnique({ where: { id } });
-        if (!product) continue;
+      let targetDrawerName = "";
+      if (drawerId) {
+        const targetDrawer = await tx.drawer.findUnique({ where: { id: drawerId } });
+        if (targetDrawer) targetDrawerName = targetDrawer.name;
+      }
 
-        const updateData = {};
-        if (categoryId) updateData.categoryId = categoryId;
-        if (drawerId) updateData.drawerId = drawerId;
-        if (status) updateData.status = status;
-        if (quantityDelta !== undefined) {
-          updateData.quantity = Math.max(0, product.quantity + Number(quantityDelta));
+      let auditAction = "";
+      if (drawerId && ids.length === 1) {
+        const product = await tx.product.findUnique({ where: { id: ids[0] } });
+        if (product) {
+          const originDrawer = product.drawerId ? await tx.drawer.findUnique({ where: { id: product.drawerId } }) : null;
+          const originName = originDrawer ? originDrawer.name : "Gaveta anterior";
+
+          const updateData = { drawerId };
+          if (categoryId) updateData.categoryId = categoryId;
+          if (status) updateData.status = status;
+          if (quantityDelta !== undefined) {
+            updateData.quantity = Math.max(0, product.quantity + Number(quantityDelta));
+          }
+          if (pricePercent !== undefined && Number(pricePercent) !== 0) {
+            updateData.price = Number((product.price * (1 + Number(pricePercent) / 100)).toFixed(2));
+          }
+
+          await tx.product.update({
+            where: { id: ids[0] },
+            data: updateData,
+          });
+
+          auditAction = `Ferramenta ${product.internalId} (${product.name}) movida de '${originName}' para '${targetDrawerName || "gaveta"}'${reason ? ". Motivo: " + reason : ""}`;
         }
-        if (pricePercent !== undefined && Number(pricePercent) !== 0) {
-          updateData.price = Number((product.price * (1 + Number(pricePercent) / 100)).toFixed(2));
+      } else {
+        for (const id of ids) {
+          const product = await tx.product.findUnique({ where: { id } });
+          if (!product) continue;
+
+          const updateData = {};
+          if (categoryId) updateData.categoryId = categoryId;
+          if (drawerId) updateData.drawerId = drawerId;
+          if (status) updateData.status = status;
+          if (quantityDelta !== undefined) {
+            updateData.quantity = Math.max(0, product.quantity + Number(quantityDelta));
+          }
+          if (pricePercent !== undefined && Number(pricePercent) !== 0) {
+            updateData.price = Number((product.price * (1 + Number(pricePercent) / 100)).toFixed(2));
+          }
+
+          await tx.product.update({
+            where: { id },
+            data: updateData,
+          });
         }
 
-        await tx.product.update({
-          where: { id },
-          data: updateData,
-        });
+        if (drawerId) {
+          auditAction = `${ids.length} ferramentas movidas para '${targetDrawerName || "gaveta"}'${reason ? ". Motivo: " + reason : ""}`;
+        } else if (ids.length === 1) {
+          const product = await tx.product.findUnique({ where: { id: ids[0] } });
+          const code = product?.internalId || ids[0];
+          auditAction = `Alteração realizada na ferramenta ${code}${reason ? ". Motivo: " + reason : ""}`;
+        } else {
+          auditAction = `Edição em lote aplicada em ${ids.length} produtos${reason ? ". Motivo: " + reason : ""}`;
+        }
       }
 
       await tx.audit.create({
         data: {
           id: uid("audit"),
           user: username,
-          action: `Operação em massa aplicada em ${ids.length} produtos`,
+          action: auditAction,
         },
       });
     });
