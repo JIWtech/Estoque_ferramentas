@@ -295,13 +295,14 @@ textarea {
 
 .content {
   min-width: 0;
-  padding: 30px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   height: 100vh !important;
   max-height: 100vh !important;
-  overflow-y: auto !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
 }
 
 .content.fade-in-view {
@@ -436,21 +437,59 @@ textarea {
   background: var(--panel);
 }
 
-/* Custom Scrollbar for tables */
+.desktop-only {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container único para painéis com tabela e rolagem interna */
+.products-panel,
+.panel:has(.table-wrap) {
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--panel);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  flex: 1 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.products-panel .table-wrap,
+.panel:has(.table-wrap) .table-wrap,
+.table-wrap {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar suave e elegante para dentro da tabela */
 .table-wrap::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 .table-wrap::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
-  border-radius: 3px;
+  background: rgba(10, 11, 14, 0.6);
+  border-radius: 4px;
 }
 .table-wrap::-webkit-scrollbar-thumb {
-  background: var(--line);
-  border-radius: 3px;
+  background: rgba(249, 115, 22, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(249, 115, 22, 0.2);
 }
 .table-wrap::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: rgba(249, 115, 22, 0.85);
 }
 
 table {
@@ -1316,13 +1355,19 @@ tr:hover td {
   }
 }
 
-/* ----------------- VISIBILIDADE RESPONSIVA ----------------- */
+/* ----------------- VISIBILIDADE RESPONSIVA & FILTROS ----------------- */
 .desktop-only {
   display: block;
 }
 
 .mobile-only {
   display: none;
+}
+
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1334,32 +1379,95 @@ tr:hover td {
     display: block !important;
   }
 
-  /* Remove panel layout on mobile to maximize card and table width */
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Remove panel layout padding on mobile to maximize card and table width */
   .panel {
-    padding: 0 !important;
+    padding: 12px !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
   }
+
+  .topbar .actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar .actions button,
+  .topbar .actions input {
+    width: 100% !important;
+  }
+}
+
+/* ----------------- TAGS DE CATEGORIA E GAVETA ----------------- */
+.badge-drawer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
 }
 
 /* ----------------- CARDS DE PRODUTO MOBILE ----------------- */
 .products-cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
 }
 
 .product-mobile-card {
   background: var(--panel);
   border: 1.5px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.product-mobile-card:hover {
+  border-color: rgba(249, 115, 22, 0.4);
+  transform: translateY(-2px);
 }
 
 .product-mobile-card.inactive {
@@ -1377,8 +1485,12 @@ tr:hover td {
 .product-mobile-card .product-id {
   font-family: monospace;
   font-weight: 700;
-  color: var(--accent);
-  font-size: 0.9rem;
+  color: #f97316;
+  font-size: 0.88rem;
+  background: rgba(249, 115, 22, 0.12);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(249, 115, 22, 0.3);
 }
 
 .product-mobile-card .card-body {
@@ -1392,19 +1504,19 @@ tr:hover td {
 }
 
 .product-mobile-card .card-image img {
-  width: 68px;
-  height: 68px;
-  border-radius: 8px;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
   object-fit: cover;
   border: 1.5px solid var(--line);
   box-shadow: var(--shadow);
 }
 
 .product-mobile-card .card-image .no-image {
-  width: 68px;
-  height: 68px;
-  border-radius: 8px;
-  background: #1e293b;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  background: #181b22;
   border: 1.5px dashed var(--line);
   display: flex;
   align-items: center;
@@ -1419,14 +1531,14 @@ tr:hover td {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   min-width: 0;
 }
 
 .product-mobile-card .card-info h3 {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  color: var(--ink);
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1439,16 +1551,22 @@ tr:hover td {
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
+  gap: 8px;
 }
 
 .product-mobile-card .info-label {
   color: var(--muted);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .product-mobile-card .info-value {
   color: var(--ink);
   font-weight: 600;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .product-mobile-card .card-footer {
@@ -1467,8 +1585,8 @@ tr:hover td {
 
 .product-mobile-card .price-tag {
   font-weight: 800;
-  color: var(--ink);
-  font-size: 1rem;
+  color: #f59e0b;
+  font-size: 1.05rem;
 }
 
 .product-mobile-card .card-actions {
@@ -1478,7 +1596,8 @@ tr:hover td {
 
 .product-mobile-card .card-actions button {
   flex: 1;
-  min-height: 36px !important;
+  min-height: 38px !important;
   font-size: 0.82rem;
+  font-weight: 700;
   padding: 4px 8px;
 }

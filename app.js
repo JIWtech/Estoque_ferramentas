@@ -746,62 +746,75 @@ function filteredProducts() {
 }
 
 function productsTable(products, selectable = false) {
+  if (!products.length) {
+    return emptyState(
+      `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+      "Nenhum produto encontrado",
+      "Não foi encontrada nenhuma ferramenta correspondente aos filtros aplicados."
+    );
+  }
+
   const tableHtml = `
     <div class="desktop-only">
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              ${selectable ? "<th style='width: 40px;'></th>" : ""}
-              <th style="width: 80px;" class="text-center">Foto</th>
-              <th style="width: 120px;">ID</th>
-              <th>Produto</th>
-              <th>Categoria</th>
-              <th>Gaveta</th>
-              <th style="width: 80px;" class="text-center">Qtd</th>
-              <th style="width: 120px;">Preço</th>
-              <th style="width: 90px;" class="text-center">Status</th>
-              <th style="width: 250px;" class="text-center">Ações</th>
+              ${selectable ? "<th style='width: 45px;' class='text-center'></th>" : ""}
+              <th style="width: 75px;" class="text-center">Foto</th>
+              <th style="width: 130px;" class="text-left">ID Interno</th>
+              <th class="text-left">Produto / Descrição</th>
+              <th style="width: 175px;" class="text-left">Categoria</th>
+              <th style="width: 175px;" class="text-left">Gaveta</th>
+              <th style="width: 110px;" class="text-center">Estoque</th>
+              <th style="width: 115px;" class="text-left">Preço</th>
+              <th style="width: 95px;" class="text-center">Status</th>
+              <th style="width: 235px;" class="text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
-            ${products.map((item) => `
-              <tr>
-                ${selectable ? `<td><input type="checkbox" class="row-check" value="${item.id}" /></td>` : ""}
-                <td class="text-center">
-                  ${item.imageUrl ? `
-                    <img src="${escapeHtml(item.imageUrl)}" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1.5px solid var(--line); box-shadow: var(--shadow);" />
-                  ` : `
-                    <div style="width: 48px; height: 48px; border-radius: 8px; background: #1e293b; border: 1.5px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--muted); font-weight: bold; margin: 0 auto;">Sem foto</div>
-                  `}
-                </td>
-                <td style="font-family: monospace; font-weight: 700; color: var(--accent);">${escapeHtml(item.internalId)}</td>
-                <td>
-                  <strong style="font-size: 0.95rem; color: var(--ink);">${escapeHtml(item.name)}</strong>
-                  <div style="font-size: 0.76rem; color: var(--muted); margin-top: 2px;">Cód: ${escapeHtml(item.manufacturerCode)}</div>
-                </td>
-                <td>${escapeHtml(categoryName(item.categoryId))}</td>
-                <td>${escapeHtml(drawerName(item.drawerId))}</td>
-                <td class="text-center">
-                  <span class="badge ${item.quantity <= 0 ? "out" : item.quantity <= 2 ? "low" : ""}">
-                    ${item.quantity} un.
-                  </span>
-                </td>
-                <td style="font-weight: 700; color: var(--ink);">${brl(item.price)}</td>
-                <td class="text-center">
-                  <span class="badge" style="background: ${item.status === "Ativo" ? "#064e3b; color: #34d399;" : "#334155; color: #cbd5e1;"}">
-                    ${escapeHtml(item.status)}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
-                    <button class="btn ghost" style="padding: 4px 10px; min-height: 28px; font-size: 0.8rem;" data-action="editProduct" data-id="${item.id}">Editar</button>
-                    <button class="btn warn" style="padding: 4px 10px; min-height: 28px; font-size: 0.8rem;" data-action="entryFor" data-id="${item.id}">Entrada</button>
-                    <button class="btn danger" style="padding: 4px 10px; min-height: 28px; font-size: 0.8rem;" data-action="exitFor" data-id="${item.id}">Saída</button>
-                  </div>
-                </td>
-              </tr>
-            `).join("")}
+            ${products.map((item) => {
+              const stockClass = item.quantity <= 0 ? "out" : item.quantity <= 2 ? "low" : "";
+              const isChecked = selectedProductIds.includes(item.id);
+              
+              return `
+                <tr style="${isChecked ? "background: rgba(249, 115, 22, 0.08);" : ""}">
+                  ${selectable ? `<td class="text-center"><input type="checkbox" class="row-check" value="${item.id}" ${isChecked ? "checked" : ""} style="width: 17px; height: 17px; cursor: pointer;" /></td>` : ""}
+                  <td class="text-center">
+                    ${item.imageUrl ? `
+                      <img src="${escapeHtml(item.imageUrl)}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1.5px solid var(--line); box-shadow: var(--shadow);" />
+                    ` : `
+                      <div style="width: 44px; height: 44px; border-radius: 8px; background: #181b22; border: 1.5px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--muted); font-weight: bold; margin: 0 auto;">Sem foto</div>
+                    `}
+                  </td>
+                  <td class="text-left"><span class="badge-code">${escapeHtml(item.internalId)}</span></td>
+                  <td class="text-left">
+                    <strong style="font-size: 0.93rem; color: #ffffff; display: block; line-height: 1.2;">${escapeHtml(item.name)}</strong>
+                    <div style="font-size: 0.76rem; color: var(--muted); margin-top: 3px;">Cód. Fabricante: <span style="color: #cbd5e1; font-weight: 600;">${escapeHtml(item.manufacturerCode)}</span></div>
+                  </td>
+                  <td class="text-left"><span class="badge-category">${escapeHtml(categoryName(item.categoryId))}</span></td>
+                  <td class="text-left"><span class="badge-drawer">${escapeHtml(drawerName(item.drawerId))}</span></td>
+                  <td class="text-center">
+                    <span class="badge ${stockClass}" style="font-weight: 800; font-size: 0.8rem; padding: 3px 8px;">
+                      ${item.quantity <= 0 ? "✕ 0 un." : item.quantity <= 2 ? `⚠ ${item.quantity} un.` : `${item.quantity} un.`}
+                    </span>
+                  </td>
+                  <td class="text-left" style="font-weight: 800; color: #f59e0b; font-size: 0.95rem;">${brl(item.price)}</td>
+                  <td class="text-center">
+                    <span class="badge" style="background: ${item.status === "Ativo" ? "rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);" : "rgba(100, 116, 139, 0.18); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.3);"} font-size: 0.72rem; padding: 2px 7px;">
+                      ${escapeHtml(item.status)}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <div style="display: flex; gap: 6px; align-items: center; justify-content: center;">
+                      <button class="btn ghost" style="padding: 4px 8px; min-height: 30px; font-size: 0.78rem; font-weight: 700;" data-action="editProduct" data-id="${item.id}">Editar</button>
+                      <button class="btn warn" style="padding: 4px 8px; min-height: 30px; font-size: 0.78rem; font-weight: 700; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff;" data-action="entryFor" data-id="${item.id}">+ Entrada</button>
+                      <button class="btn danger" style="padding: 4px 8px; min-height: 30px; font-size: 0.78rem; font-weight: 700;" data-action="exitFor" data-id="${item.id}">- Saída</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
           </tbody>
         </table>
       </div>
@@ -813,14 +826,16 @@ function productsTable(products, selectable = false) {
       <div class="products-cards">
         ${products.map((item) => {
           const stockClass = item.quantity <= 0 ? "out" : item.quantity <= 2 ? "low" : "";
+          const isChecked = selectedProductIds.includes(item.id);
+          
           return `
-            <div class="product-mobile-card ${item.status === "Inativo" ? "inactive" : ""}">
+            <div class="product-mobile-card ${item.status === "Inativo" ? "inactive" : ""}" style="${isChecked ? "border-color: #f97316; background: rgba(249, 115, 22, 0.04);" : ""}">
               <div class="card-header">
-                <div style="display: flex; align-items: center;">
-                  ${selectable ? `<input type="checkbox" class="row-check" value="${item.id}" style="width: 18px; height: 18px; margin-right: 8px;" />` : ""}
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  ${selectable ? `<input type="checkbox" class="row-check" value="${item.id}" ${isChecked ? "checked" : ""} style="width: 18px; height: 18px; cursor: pointer;" />` : ""}
                   <span class="product-id">${escapeHtml(item.internalId)}</span>
                 </div>
-                <span class="badge" style="background: ${item.status === "Ativo" ? "#064e3b; color: #34d399;" : "#334155; color: #cbd5e1;"}">${escapeHtml(item.status)}</span>
+                <span class="badge" style="background: ${item.status === "Ativo" ? "rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);" : "rgba(100, 116, 139, 0.18); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.3);"} font-size: 0.72rem; padding: 2px 7px;">${escapeHtml(item.status)}</span>
               </div>
               
               <div class="card-body">
@@ -834,29 +849,31 @@ function productsTable(products, selectable = false) {
                 <div class="card-info">
                   <h3>${escapeHtml(item.name)}</h3>
                   <div class="info-row">
-                    <span class="info-label">Cód Fabricante:</span>
-                    <span class="info-value">${escapeHtml(item.manufacturerCode)}</span>
+                    <span class="info-label">Cód. Fab:</span>
+                    <span class="info-value" style="font-family: monospace;">${escapeHtml(item.manufacturerCode)}</span>
                   </div>
                   <div class="info-row">
                     <span class="info-label">Categoria:</span>
-                    <span class="info-value">${escapeHtml(categoryName(item.categoryId))}</span>
+                    <span class="badge-category" style="font-size: 0.72rem; padding: 1px 6px;">${escapeHtml(categoryName(item.categoryId))}</span>
                   </div>
                   <div class="info-row">
                     <span class="info-label">Gaveta:</span>
-                    <span class="info-value">${escapeHtml(drawerName(item.drawerId))}</span>
+                    <span class="badge-drawer" style="font-size: 0.72rem; padding: 1px 6px;">${escapeHtml(drawerName(item.drawerId))}</span>
                   </div>
                 </div>
               </div>
               
               <div class="card-footer">
                 <div class="card-stats">
-                  <span class="badge ${stockClass}">Estoque: ${item.quantity} un.</span>
+                  <span class="badge ${stockClass}" style="font-weight: 800; font-size: 0.82rem; padding: 4px 10px;">
+                    Estoque: ${item.quantity} un.
+                  </span>
                   <span class="price-tag">${brl(item.price)}</span>
                 </div>
                 <div class="card-actions">
                   <button class="btn ghost" data-action="editProduct" data-id="${item.id}">Editar</button>
-                  <button class="btn warn" data-action="entryFor" data-id="${item.id}">Entrada</button>
-                  <button class="btn danger" data-action="exitFor" data-id="${item.id}">Saída</button>
+                  <button class="btn warn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff;" data-action="entryFor" data-id="${item.id}">+ Entrada</button>
+                  <button class="btn danger" data-action="exitFor" data-id="${item.id}">- Saída</button>
                 </div>
               </div>
             </div>
