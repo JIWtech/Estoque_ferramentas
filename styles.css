@@ -465,6 +465,12 @@ textarea {
   scroll-behavior: smooth;
 }
 
+/* Hide horizontal scrollbar track at bottom of table */
+.table-wrap::-webkit-scrollbar:horizontal {
+  height: 0px !important;
+  display: none !important;
+}
+
 /* Scrollbar visível e elegante em Laranja Industrial para dentro da tabela */
 .table-wrap::-webkit-scrollbar {
   width: 8px !important;

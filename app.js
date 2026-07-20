@@ -1411,16 +1411,35 @@ function drawerForm(drawer = null) {
 
 function entryForm(productId = "") {
   openModal(`
-    <form id="entryForm">
-      <h2>Registrar Entrada</h2>
-      <div class="grid-2">
-        <div class="field"><label>Produto</label>${productSelect("entryProductId", productId)}</div>
-        <div class="field"><label>Quantidade</label><input id="entryQuantity" type="number" min="1" required value="1"></div>
+    <form id="entryForm" style="max-width: 520px; width: 100%; display: flex; flex-direction: column; gap: 16px; margin: 0 auto;">
+      <div style="display: flex; align-items: center; gap: 14px; border-bottom: 2px solid var(--line); padding-bottom: 14px;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1.5px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        <div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin: 0;">Entrada de Estoque</h2>
+          <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">Adicione novas unidades de ferramentas ao inventário.</p>
+        </div>
       </div>
-      <div class="field"><label>Observações</label><textarea id="entryNotes"></textarea></div>
-      <div class="actions">
-        <button class="btn primary" type="submit">Salvar Entrada</button>
-        <button class="btn ghost" type="button" data-action="closeModal">Cancelar</button>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Ferramenta / Produto</label>
+        ${productSelect("entryProductId", productId)}
+      </div>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Quantidade Adicionada</label>
+        <input id="entryQuantity" type="number" min="1" required value="1" style="width: 100%; font-size: 1.05rem; font-weight: 700; color: #34d399;" />
+      </div>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Observações / Motivo</label>
+        <textarea id="entryNotes" placeholder="Digite uma justificativa ou observação para esta entrada..." style="width: 100%; min-height: 80px;"></textarea>
+      </div>
+
+      <div class="actions" style="margin-top: 8px; display: flex; gap: 12px; width: 100%;">
+        <button class="btn ghost" type="button" data-action="closeModal" style="flex: 1; min-height: 44px; font-weight: 700;">Cancelar</button>
+        <button class="btn warn" type="submit" style="flex: 1; min-height: 44px; font-weight: 800; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff;">+ Confirmar Entrada</button>
       </div>
     </form>
   `);
@@ -1428,18 +1447,46 @@ function entryForm(productId = "") {
 
 function exitForm(productId = "") {
   openModal(`
-    <form id="exitForm">
-      <h2>Registrar saída com recibo</h2>
-      <div class="grid-2">
-        <div class="field"><label>Produto</label>${productSelect("exitProductId", productId)}</div>
-        <div class="field"><label>Quantidade</label><input id="exitQuantity" type="number" min="1" required value="1"></div>
-        <div class="field"><label>Responsável pela retirada</label><input id="exitResponsible" required></div>
-        <div class="field"><label>Destino</label><input id="exitDestination"></div>
+    <form id="exitForm" style="max-width: 520px; width: 100%; display: flex; flex-direction: column; gap: 16px; margin: 0 auto;">
+      <div style="display: flex; align-items: center; gap: 14px; border-bottom: 2px solid var(--line); padding-bottom: 14px;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1.5px solid rgba(239, 68, 68, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        <div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin: 0;">Saída com Recibo</h2>
+          <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">Registre a retirada de ferramenta com assinatura obrigatória.</p>
+        </div>
       </div>
-      <div class="field"><label>Motivo</label><textarea id="exitReason" required></textarea></div>
-      <div class="actions">
-        <button class="btn primary" type="submit">Gerar saída e recibo</button>
-        <button class="btn ghost" type="button" data-action="closeModal">Cancelar</button>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Ferramenta / Produto</label>
+        ${productSelect("exitProductId", productId)}
+      </div>
+
+      <div class="grid-2" style="gap: 12px;">
+        <div class="field">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Qtd Retirada</label>
+          <input id="exitQuantity" type="number" min="1" required value="1" style="width: 100%; font-size: 1.05rem; font-weight: 700; color: #ef4444;" />
+        </div>
+        <div class="field">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Responsável</label>
+          <input id="exitResponsible" required placeholder="Nome do operador..." style="width: 100%;" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Destino da Ferramenta</label>
+        <input id="exitDestination" placeholder="Ex: Máquina CNC 02, Setor Usinagem..." style="width: 100%;" />
+      </div>
+
+      <div class="field">
+        <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Motivo / Justificativa</label>
+        <textarea id="exitReason" required placeholder="Digite o motivo da retirada..." style="width: 100%; min-height: 70px;"></textarea>
+      </div>
+
+      <div class="actions" style="margin-top: 8px; display: flex; gap: 12px; width: 100%;">
+        <button class="btn ghost" type="button" data-action="closeModal" style="flex: 1; min-height: 44px; font-weight: 700;">Cancelar</button>
+        <button class="btn danger" type="submit" style="flex: 1; min-height: 44px; font-weight: 800;">- Gerar Saída e Recibo</button>
       </div>
     </form>
   `);
@@ -1449,19 +1496,44 @@ function bulkForm() {
   const ids = [...document.querySelectorAll(".row-check:checked")].map((item) => item.value);
   if (!ids.length) return showToast("Selecione pelo menos um produto.", "error");
   openModal(`
-    <form id="bulkForm">
-      <h2>Editar ${ids.length} Produtos em Lote</h2>
-      <input type="hidden" id="bulkIds" value="${ids.join(",")}" />
-      <div class="grid-3">
-        <div class="field"><label>Categoria</label><select id="bulkCategory"><option value="">Não alterar</option>${categories.map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}</select></div>
-        <div class="field"><label>Gaveta</label><select id="bulkDrawer"><option value="">Não alterar</option>${state.drawers.map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}</select></div>
-        <div class="field"><label>Status</label><select id="bulkStatus"><option value="">Não alterar</option><option>Ativo</option><option>Inativo</option></select></div>
-        <div class="field"><label>Somar quantidade</label><input id="bulkQuantity" type="number" value="0"></div>
-        <div class="field"><label>Reajuste preço (%)</label><input id="bulkPrice" type="number" step="0.01" value="0"></div>
+    <form id="bulkForm" style="max-width: 580px; width: 100%; display: flex; flex-direction: column; gap: 16px; margin: 0 auto;">
+      <div style="display: flex; align-items: center; gap: 14px; border-bottom: 2px solid var(--line); padding-bottom: 14px;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(249, 115, 22, 0.15); color: #f97316; border: 1.5px solid rgba(249, 115, 22, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </div>
+        <div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin: 0;">Edição em Lote (${ids.length} itens)</h2>
+          <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">Aplique alterações simultâneas para as ferramentas selecionadas.</p>
+        </div>
       </div>
-      <div class="actions">
-        <button class="btn primary" type="submit">Aplicar em massa</button>
-        <button class="btn ghost" type="button" data-action="closeModal">Cancelar</button>
+
+      <input type="hidden" id="bulkIds" value="${ids.join(",")}" />
+      <div class="grid-3" style="gap: 12px;">
+        <div class="field">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Categoria</label>
+          <select id="bulkCategory" style="width: 100%;"><option value="">Não alterar</option>${categories.map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Gaveta</label>
+          <select id="bulkDrawer" style="width: 100%;"><option value="">Não alterar</option>${state.drawers.map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Status</label>
+          <select id="bulkStatus" style="width: 100%;"><option value="">Não alterar</option><option>Ativo</option><option>Inativo</option></select>
+        </div>
+        <div class="field">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Somar Qtd</label>
+          <input id="bulkQuantity" type="number" value="0" style="width: 100%;" />
+        </div>
+        <div class="field" style="grid-column: span 2;">
+          <label style="font-weight: 700; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Reajuste Preço (%)</label>
+          <input id="bulkPrice" type="number" step="0.01" value="0" style="width: 100%;" />
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top: 10px; display: flex; gap: 12px; width: 100%;">
+        <button class="btn ghost" type="button" data-action="closeModal" style="flex: 1; min-height: 44px; font-weight: 700;">Cancelar</button>
+        <button class="btn primary" type="submit" style="flex: 1; min-height: 44px; font-weight: 800;">Aplicar em Massa</button>
       </div>
     </form>
   `);
